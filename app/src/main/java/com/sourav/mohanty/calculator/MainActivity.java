@@ -20,16 +20,13 @@ import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
 
-    // Declaring Final Strings
     private final String SAVED_OPERATION = "pendingOp";
     private final String SAVED_OPERAND = "op1";
 
-    // Declaring Variable
     private EditText newNumber;
     private EditText result;
     private TextView displayOperation;
 
-    // Variables to hold data for operations;
     private Double op1 = null;
     private String pendingOp = "=";
 
@@ -66,7 +63,6 @@ public class MainActivity extends AppCompatActivity {
         Button percentageButton = findViewById(R.id.percentage);
         Button brackets = findViewById(R.id.buttonBracket);
 
-        //For The Scientific Operations Only
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
 
             //Scientific Operation Buttons
@@ -96,6 +92,7 @@ public class MainActivity extends AppCompatActivity {
                     toast.show();
                 }
             });
+
             buttonPie.setOnClickListener(v -> {
                 try {
                     double i = Integer.parseInt(result.getText().toString());
@@ -109,6 +106,7 @@ public class MainActivity extends AppCompatActivity {
                     op1 = null;
                 }
             });
+
             buttonRoot.setOnClickListener(v -> {
                 try {
                     double c = Double.parseDouble(String.valueOf(result.getText()));
@@ -190,24 +188,18 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
-        //Added OnClick Action For The Number Buttons....
         View.OnClickListener onClickNumber = v -> {
             Button b = (Button) v;
             String digit = b.getText().toString();
 
-            // If a new number is expected, clear the field before appending
             if (isNewNumber) {
-                result.setText(digit);  // Replace with the first digit
-                isNewNumber = false;    // Disable new number mode so next digits append
+                result.setText(digit);
+                isNewNumber = false;
             } else {
-                result.append(digit);   // Append digits normally
+                result.append(digit);
             }
         };
 
-
-
-
-        //Assigned the OnClick Action For the All Number Buttons....
         button0.setOnClickListener(onClickNumber);
         button1.setOnClickListener(onClickNumber);
         button2.setOnClickListener(onClickNumber);
@@ -220,7 +212,6 @@ public class MainActivity extends AppCompatActivity {
         button9.setOnClickListener(onClickNumber);
         buttonDot.setOnClickListener(onClickNumber);
 
-        //Added onClick Action For Operation Buttons
         View.OnClickListener onClickOperation = v -> {
             Button b = (Button) v;
             String operation = b.getText().toString();
@@ -234,9 +225,8 @@ public class MainActivity extends AppCompatActivity {
             }
 
             displayOperation.setText(operation);
-            isNewNumber = true;  // Ensure next number input starts fresh
+            isNewNumber = true;
         };
-
 
         buttonEquals.setOnClickListener(v -> {
             String value = result.getText().toString();
@@ -246,14 +236,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //Assigning onClick Actions For Operation Buttons
         buttonDevide.setOnClickListener(onClickOperation);
         buttonMinus.setOnClickListener(onClickOperation);
         buttonPlus.setOnClickListener(onClickOperation);
         buttonMultiply.setOnClickListener(onClickOperation);
         percentageButton.setOnClickListener(onClickNumber);
         Button clearText = findViewById(R.id.clearText);
-
 
         clearText.setOnClickListener(v -> {
             newNumber.setText("");
@@ -265,7 +253,7 @@ public class MainActivity extends AppCompatActivity {
         percentageButton.setOnClickListener(v -> {
             String s = newNumber.getText().toString();
             String m = result.getText().toString();
-            if ((s.length() == 0) && (m.length() == 0)) {
+            if ((s.isEmpty()) && (m.isEmpty())) {
                 newNumber.setText("0.0");
             } else {
                 try {
@@ -288,7 +276,7 @@ public class MainActivity extends AppCompatActivity {
         Button buttonNeg = findViewById(R.id.negSymobol);
         buttonNeg.setOnClickListener(v -> {
             String s = result.getText().toString();
-            if (s.length() == 0) {
+            if (s.isEmpty()) {
                 result.setText("-");
             } else {
                 try {
@@ -312,14 +300,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
         boolean isFirstRun = sharedPreferences.getBoolean("IS_FIRST_RUN", true);
 
         if (isFirstRun) {
-            // AlertDialog Builder class
             AlertDialog.Builder builder
                     = new AlertDialog
                     .Builder(MainActivity.this);
@@ -350,12 +336,11 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("SetTextI18n")
     private void performOperation(Double value, String operation) {
         if (op1 == null) {
-            op1 = value;  // Store first operand
+            op1 = value;
         } else {
             if (pendingOp.equals("=")) {
-                pendingOp = operation; // Just update operation without computing
+                pendingOp = operation;
             } else if (operation.equals("=")) {
-                // Compute only when '=' is pressed
                 switch (pendingOp) {
                     case "÷":
                         if (value == 0) {
@@ -375,22 +360,20 @@ public class MainActivity extends AppCompatActivity {
                         op1 += value;
                         break;
                 }
-
-                // Show result only when '=' is pressed
                 result.setText(formatNumber(op1));
                 isNewNumber = true;
             }
         }
 
-        pendingOp = operation; // Update operation
+        pendingOp = operation;
         displayOperation.setText(operation);
     }
 
     private String formatNumber(double num) {
         if (num == (int) num) {
-            return String.valueOf((int) num);  // Show integer
+            return String.valueOf((int) num);
         } else {
-            return String.valueOf(num);  // Show decimal if needed
+            return String.valueOf(num);
         }
     }
 
