@@ -33,6 +33,8 @@ public class MainActivity extends AppCompatActivity {
     private Double op1 = null;
     private String pendingOp = "=";
 
+    private boolean isNewNumber = true;
+
     @SuppressLint({"SetTextI18n", "ResourceType", "InflateParams"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -191,8 +193,19 @@ public class MainActivity extends AppCompatActivity {
         //Added OnClick Action For The Number Buttons....
         View.OnClickListener onClickNumber = v -> {
             Button b = (Button) v;
-            result.append(b.getText().toString());
+            String digit = b.getText().toString();
+
+            // If a new number is expected, clear the field before appending
+            if (isNewNumber) {
+                result.setText(digit);  // Replace with the first digit
+                isNewNumber = false;    // Disable new number mode so next digits append
+            } else {
+                result.append(digit);   // Append digits normally
+            }
         };
+
+
+
 
         //Assigned the OnClick Action For the All Number Buttons....
         button0.setOnClickListener(onClickNumber);
@@ -212,18 +225,28 @@ public class MainActivity extends AppCompatActivity {
             Button b = (Button) v;
             String operation = b.getText().toString();
             String value = result.getText().toString();
+
             try {
                 Double doubleValue = Double.valueOf(value);
                 performOperation(doubleValue, operation);
             } catch (NumberFormatException e) {
                 result.setText("");
             }
-            pendingOp = operation;
-            displayOperation.setText(pendingOp);
+
+            displayOperation.setText(operation);
+            isNewNumber = true;  // Ensure next number input starts fresh
         };
 
+
+        buttonEquals.setOnClickListener(v -> {
+            String value = result.getText().toString();
+            if (!value.isEmpty()) {
+                Double doubleValue = Double.valueOf(value);
+                performOperation(doubleValue, "=");
+            }
+        });
+
         //Assigning onClick Actions For Operation Buttons
-        buttonEquals.setOnClickListener(onClickOperation);
         buttonDevide.setOnClickListener(onClickOperation);
         buttonMinus.setOnClickListener(onClickOperation);
         buttonPlus.setOnClickListener(onClickOperation);
@@ -326,36 +349,49 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressLint("SetTextI18n")
     private void performOperation(Double value, String operation) {
-        if (null == op1) {
-            op1 = value;
+        if (op1 == null) {
+            op1 = value;  // Store first operand
         } else {
             if (pendingOp.equals("=")) {
-                pendingOp = operation;
-            }
-            switch (pendingOp) {
-                case "=":
-                    op1 = value;
-                    break;
-                case "÷":
-                    if (value == 0) {
-                        op1 = 0.0;
-                    } else {
-                        op1 /= value;
-                    }
-                    break;
-                case "×":
-                    op1 *= value;
-                    break;
-                case "-":
-                    op1 -= value;
-                    break;
-                case "+":
-                    op1 += value;
-                    break;
+                pendingOp = operation; // Just update operation without computing
+            } else if (operation.equals("=")) {
+                // Compute only when '=' is pressed
+                switch (pendingOp) {
+                    case "÷":
+                        if (value == 0) {
+                            Toast.makeText(this, "Error: Division by Zero", Toast.LENGTH_SHORT).show();
+                            return;
+                        } else {
+                            op1 /= value;
+                        }
+                        break;
+                    case "×":
+                        op1 *= value;
+                        break;
+                    case "-":
+                        op1 -= value;
+                        break;
+                    case "+":
+                        op1 += value;
+                        break;
+                }
+
+                // Show result only when '=' is pressed
+                result.setText(formatNumber(op1));
+                isNewNumber = true;
             }
         }
-        newNumber.setText(Double.toString(op1));
-        result.setText("");
+
+        pendingOp = operation; // Update operation
+        displayOperation.setText(operation);
+    }
+
+    private String formatNumber(double num) {
+        if (num == (int) num) {
+            return String.valueOf((int) num);  // Show integer
+        } else {
+            return String.valueOf(num);  // Show decimal if needed
+        }
     }
 
     @Override
